@@ -6,7 +6,7 @@
  */
 import { createRequire } from "node:module";
 import sharp from "sharp";
-import { mkdirSync, existsSync } from "node:fs";
+import { mkdirSync, existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { slugify } from "@lumen/core";
 import { seedProducts } from "@lumen/core/seed";
@@ -19,6 +19,10 @@ const BASE = process.env.RENDER_URL ?? "http://127.0.0.1:5173";
 const OUT = join(import.meta.dirname, "../public/products");
 const only = process.argv.find((a) => a.startsWith("--only="))?.slice(7);
 const force = process.argv.includes("--force");
+// --since=<file>: re-render shots older than that file (e.g. after a lighting change), keep newer ones.
+const since = process.argv.find((a) => a.startsWith("--since="))?.slice(8);
+const sinceMs = since ? statSync(since).mtimeMs : 0;
+const isFresh = (f: string) => existsSync(f) && statSync(f).mtimeMs > sinceMs;
 mkdirSync(OUT, { recursive: true });
 
 const jobs = seedProducts().flatMap((p) =>
@@ -37,7 +41,7 @@ page.on("pageerror", (e) => console.error("pageerror", e.message));
 let n = 0;
 for (const j of jobs) {
   if (only && j.slug !== only) continue;
-  if (!force && existsSync(join(OUT, `${j.file}.avif`))) continue;
+  if (!force && isFresh(join(OUT, `${j.file}.avif`))) continue;
   await page.goto(`${BASE}/render?${new URLSearchParams({ ...j.query, dpr: "1.3" })}`);
   await page.waitForFunction(() => (window as unknown as { __ready?: boolean }).__ready === true, null, { timeout: 240_000 });
   const png = await page.screenshot({ omitBackground: true, type: "png" });
