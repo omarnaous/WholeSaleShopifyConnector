@@ -1,0 +1,4 @@
+SHOPIFY_API_KEY=your-client-id
+SHOPIFY_API_SECRET=your-client-secret
+ADMIN_PASSWORD=change-me
+ADMIN_JWT_SECRET=a-long-random-string

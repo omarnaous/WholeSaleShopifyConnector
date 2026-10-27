@@ -1,0 +1,33 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lumen-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  // The embedded Shopify app frontend is served from the same origin as the API,
+  // so App Bridge session tokens never need CORS.
+  "assets": {
+    "directory": "../shopify/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/webhooks/*", "/img/*", "/health"]
+  },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "lumen", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
+  ],
+  "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "lumen-images" }],
+  "queues": {
+    "producers": [{ "binding": "JOBS", "queue": "lumen-jobs" }],
+    "consumers": [{ "queue": "lumen-jobs", "max_batch_size": 5, "max_batch_timeout": 2, "max_retries": 5, "dead_letter_queue": "lumen-jobs-dlq" }]
+  },
+  "triggers": { "crons": ["17 */6 * * *"] },
+  "vars": {
+    "SHOPIFY_API_VERSION": "2026-07",
+    "SHOPIFY_APP_HANDLE": "lumen-wholesale",
+    "PUBLIC_URL": "http://localhost:8787",
+    "CORS_ORIGINS": "http://localhost:5173,http://localhost:5174",
+    "IMAGE_TRANSFORMS": "off",
+    "BILLING_TEST": "true"
+  }
+  // Secrets (wrangler secret put / .dev.vars): SHOPIFY_API_KEY, SHOPIFY_API_SECRET, ADMIN_PASSWORD, ADMIN_JWT_SECRET
+}

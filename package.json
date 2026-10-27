@@ -1,0 +1,14 @@
+{
+  "name": "lumen-wholesale",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "dev:api": "pnpm --filter @lumen/api dev",
+    "dev:web": "pnpm --filter @lumen/web dev",
+    "dev:shopify": "pnpm --filter @lumen/shopify dev",
+    "dev:admin": "pnpm --filter @lumen/admin dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
+  }
+}
