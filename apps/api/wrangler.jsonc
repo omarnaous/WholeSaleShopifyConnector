@@ -13,7 +13,7 @@
     "run_worker_first": ["/api/*", "/webhooks/*", "/img/*", "/health"]
   },
   "d1_databases": [
-    { "binding": "DB", "database_name": "lumen", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
+    { "binding": "DB", "database_name": "lumen", "database_id": "cdf76d1f-b8d7-4c75-933d-825542473109", "migrations_dir": "migrations" }
   ],
   "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "lumen-images" }],
   "queues": {
@@ -24,8 +24,8 @@
   "vars": {
     "SHOPIFY_API_VERSION": "2026-07",
     "SHOPIFY_APP_HANDLE": "lumen-wholesale",
-    "PUBLIC_URL": "http://localhost:8787",
-    "CORS_ORIGINS": "http://localhost:5173,http://localhost:5174",
+    "PUBLIC_URL": "https://lumen-api.lumen-api.workers.dev",
+    "CORS_ORIGINS": "https://lumen-admin-9u7.pages.dev,https://lumen-web-dgx.pages.dev,http://localhost:5173,http://localhost:5174",
     "IMAGE_TRANSFORMS": "off",
     "BILLING_TEST": "true"
   }
