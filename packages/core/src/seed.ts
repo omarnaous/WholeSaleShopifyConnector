@@ -103,7 +103,9 @@ export function seedProducts(imageBase = "/products"): Product[] {
     const id = `prd_${slug}`;
     const variants: Variant[] = d.combos.map(([frame, lens], j) => {
       const key = `${slugify(frame)}-${slugify(lens)}`;
-      const stock = Math.round(r() * 220) * (r() < 0.12 ? 0 : 1);
+      // A few realistic stock-outs and low-stock colourways, never on a product's lead colourway.
+      const roll = r();
+      const stock = j > 0 && roll < 0.06 ? 0 : j > 0 && roll < 0.14 ? 3 + Math.round(r() * 6) : 24 + Math.round(r() * 200);
       return {
         id: `var_${slug}_${key}`,
         productId: id,

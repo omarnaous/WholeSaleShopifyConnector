@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ElementTyp
 import Lenis from "lenis";
 import { cancelFrame, frame, motion, useInView, useMotionValue, useReducedMotion, useSpring, type Variants } from "motion/react";
 import { clsx } from "clsx";
+import { useLocation } from "react-router";
 
 export const EASE_OUT = [0.16, 1, 0.3, 1] as const;
 export const EASE_IN_OUT = [0.76, 0, 0.24, 1] as const;
@@ -188,6 +189,10 @@ export function Cursor() {
       document.documentElement.classList.remove("has-cursor");
     };
   }, [reduce, x, y]);
+
+  // A route change swaps the element under a resting pointer: drop any "View"/"Drag" state.
+  const { pathname } = useLocation();
+  useEffect(() => setMode({ kind: "default" }), [pathname]);
 
   if (!enabled) return null;
   const big = mode.kind === "view" || mode.kind === "drag";

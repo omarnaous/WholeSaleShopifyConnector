@@ -28,6 +28,8 @@ export function Hero() {
   const scrollTo = useScrollTo();
 
   useMotionValueEvent(scrollYProgress, "change", (p) => {
+    // Reduced motion: the hero is a single static screen (its progress would read as "finished").
+    if (reduce) return;
     setTint(Math.min(3, Math.max(0, Math.floor((p / 0.82) * 4))));
     setOutro(p > 0.86);
   });
