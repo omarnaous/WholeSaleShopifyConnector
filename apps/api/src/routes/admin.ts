@@ -2,7 +2,8 @@ import { Hono, type MiddlewareHandler } from "hono";
 import { and, desc, eq, gte, isNull, lt, ne, sql } from "drizzle-orm";
 import { SignJWT, jwtVerify } from "jose";
 import { z } from "zod";
-import { productInput, type AdminJobRow, type AdminStats, type AdminStoreRow, type SubscriptionStatus, type SyncedField } from "@lumen/core";
+import { productInput } from "@lumen/core/schemas";
+import { type AdminJobRow, type AdminStats, type AdminStoreRow, type SubscriptionStatus, type SyncedField } from "@lumen/core";
 import type { AppContext } from "../env";
 import * as s from "../db/schema";
 import { getDb, getProduct, listProducts, newId, nowIso, saveProduct } from "../db/repo";
@@ -127,7 +128,8 @@ admin.get("/stores", async (c) => {
       installedAt: s.shops.installedAt,
       uninstalledAt: s.shops.uninstalledAt,
       lastSyncAt: s.shops.lastSyncAt,
-      importedProducts: sql<number>`(select count(*) from ${s.importedProducts} where ${s.importedProducts.shopId} = ${s.shops.id} and ${s.importedProducts.status} != 'ORPHANED')`,
+      // Raw, table-qualified SQL: drizzle renders bare column names inside sql``, which would make this self-referential.
+      importedProducts: sql<number>`(select count(*) from imported_products ip where ip.shop_id = shops.id and ip.status != 'ORPHANED')`,
     })
     .from(s.shops)
     .orderBy(desc(s.shops.installedAt));

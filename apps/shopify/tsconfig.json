@@ -1,0 +1,7 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["vite/client", "@shopify/polaris-types", "@shopify/app-bridge-types"]
+  },
+  "include": ["src", "vite.config.ts"]
+}

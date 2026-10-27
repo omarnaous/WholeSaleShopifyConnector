@@ -1,0 +1,291 @@
+/*
+ * Only the few bits Polaris web components don't cover: product card media (hover zoom, colourway
+ * crossfade), swatches, skeletons, the sticky import bar and the demo toast/ribbon.
+ * Motion uses transform/opacity only and is disabled under prefers-reduced-motion.
+ */
+
+:root {
+  --lumen-radius: 12px;
+  --lumen-border: rgba(0, 0, 0, 0.08);
+  --lumen-surface: #fff;
+  --lumen-subdued: #f1f1f1;
+  --lumen-accent: #005bd3;
+  --lumen-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+html,
+body {
+  margin: 0;
+}
+
+/* App Bridge reads the nav from the DOM; it must never render inside the iframe. */
+s-app-nav {
+  display: none;
+}
+
+/* ── Product grid ─────────────────────────────────────────────────────── */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 248px), 1fr));
+  gap: 16px;
+  transition: opacity 160ms ease;
+}
+.card-grid[data-loading] {
+  opacity: 0.6;
+}
+
+.card {
+  position: relative;
+  border-radius: var(--lumen-radius);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition:
+    outline-color 160ms ease,
+    transform 200ms var(--lumen-ease);
+}
+.card[data-selected] {
+  outline-color: var(--lumen-accent);
+}
+
+.card-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--lumen-subdued);
+  cursor: pointer;
+}
+.card[data-imported] .card-media {
+  cursor: default;
+}
+
+.card-media__layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1);
+  transition:
+    opacity 280ms ease,
+    transform 600ms var(--lumen-ease);
+}
+.card-media__layer[data-active] {
+  opacity: 1;
+}
+.card-media__layer s-image {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+.card:hover .card-media__layer,
+.card:focus-within .card-media__layer {
+  transform: scale(1.06);
+}
+
+.card-media__placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.card-media__corner {
+  position: absolute;
+  inset-block-start: 10px;
+  display: flex;
+  gap: 6px;
+  z-index: 1;
+}
+.card-media__corner--start {
+  inset-inline-start: 10px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+.card-media__corner--start:empty {
+  display: none;
+}
+.card-media__corner--end {
+  inset-inline-end: 10px;
+}
+
+/* ── Swatches ─────────────────────────────────────────────────────────── */
+
+.swatches {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-block-size: 24px;
+}
+.swatches__label {
+  margin-inline-start: 4px;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.swatch {
+  inline-size: 20px;
+  block-size: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  /* left half = frame, right half = lens */
+  background: linear-gradient(90deg, var(--frame) 0 50%, var(--lens) 50% 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+    0 0 0 2px var(--lumen-surface),
+    0 0 0 3px transparent;
+  transition:
+    transform 140ms var(--lumen-ease),
+    box-shadow 140ms ease;
+}
+.swatch:hover {
+  transform: scale(1.12);
+}
+.swatch[aria-checked="true"] {
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+    0 0 0 2px var(--lumen-surface),
+    0 0 0 3.5px #303030;
+}
+.swatch:focus-visible {
+  outline: 2px solid var(--lumen-accent);
+  outline-offset: 3px;
+}
+
+/* ── Sticky import bar ────────────────────────────────────────────────── */
+
+.action-bar {
+  position: sticky;
+  inset-block-end: 12px;
+  z-index: 5;
+  margin-block-start: 8px;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+  opacity: 0.92;
+  transform: translateY(0);
+  transition:
+    opacity 180ms ease,
+    transform 220ms var(--lumen-ease);
+}
+.action-bar[data-active] {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+/* ── Plan ─────────────────────────────────────────────────────────────── */
+
+.plan-price {
+  font-size: 2rem;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Skeletons ────────────────────────────────────────────────────────── */
+
+.skeleton {
+  background: #e3e3e3;
+  border-radius: 6px;
+  animation: lumen-pulse 1.4s ease-in-out infinite;
+}
+.skeleton--media {
+  aspect-ratio: 4 / 3;
+  border-radius: 0;
+}
+.skeleton--line {
+  block-size: 12px;
+}
+.skeleton--thumb {
+  inline-size: 48px;
+  block-size: 48px;
+  flex: none;
+}
+.skeleton-card {
+  overflow: hidden;
+  border: 1px solid var(--lumen-border);
+  border-radius: var(--lumen-radius);
+  background: var(--lumen-surface);
+}
+.skeleton-card__body {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+.skeleton-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.skeleton-row__lines {
+  display: grid;
+  gap: 8px;
+  flex: 1;
+}
+
+@keyframes lumen-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* ── Demo mode ────────────────────────────────────────────────────────── */
+
+.demo-ribbon {
+  position: fixed;
+  inset-block-end: 12px;
+  inset-inline-start: 12px;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.demo-toasts {
+  position: fixed;
+  inset-block-end: 24px;
+  inset-inline: 0;
+  z-index: 30;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.demo-toast {
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #1a1a1a;
+  color: #fff;
+  font: 500 14px/1.4 -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, sans-serif;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 200ms ease,
+    transform 200ms var(--lumen-ease);
+}
+.demo-toast[data-error="true"] {
+  background: #8e1f0b;
+}
+.demo-toast[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .card:hover .card-media__layer,
+  .card:focus-within .card-media__layer,
+  .swatch:hover,
+  .action-bar[data-active] {
+    transform: none;
+  }
+}

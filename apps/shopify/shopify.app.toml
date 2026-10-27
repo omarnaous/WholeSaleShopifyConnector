@@ -1,0 +1,57 @@
+# Shopify CLI app configuration for Lumen Wholesale.
+# Docs: https://shopify.dev/docs/apps/build/cli-for-apps/app-configuration
+#
+# The app (this Vite frontend) and its backend are ONE Cloudflare Worker (apps/api): the worker serves
+# `apps/shopify/dist` as static assets and handles /api/* and /webhooks/* on the same origin.
+# Push changes with `shopify app deploy` (scopes, URLs and webhook subscriptions live here, not in code).
+
+# Client ID from the Partner Dashboard / Dev Dashboard. Also set it as VITE_SHOPIFY_API_KEY (frontend build)
+# and SHOPIFY_API_KEY (worker secret).
+client_id = "REPLACE_ME"
+name = "Lumen Wholesale"
+# Must match SHOPIFY_APP_HANDLE in apps/api/wrangler.jsonc (used for the billing return URL).
+handle = "lumen-wholesale"
+# Where Shopify loads the embedded app from: the worker's public URL.
+application_url = "https://lumen-api.example.workers.dev"
+embedded = true
+
+[access_scopes]
+# write_products: create/update the imported products and their status (ACTIVE/DRAFT).
+# write_inventory: set stock and cost per item. read_locations: find the store's default location.
+scopes = "write_products,write_inventory,read_locations"
+# Managed installation: Shopify installs the app and grants scopes; the worker then performs
+# token exchange on the first request carrying an App Bridge session token.
+use_legacy_install_flow = false
+
+[auth]
+# Not used by managed install + token exchange, but the CLI requires at least one.
+redirect_urls = ["https://lumen-api.example.workers.dev"]
+
+[webhooks]
+# Keep in step with SHOPIFY_API_VERSION in apps/api/wrangler.jsonc.
+api_version = "2026-07"
+
+  # One endpoint for every topic; apps/api/src/routes/webhooks.ts switches on X-Shopify-Topic.
+  [[webhooks.subscriptions]]
+  # Billing changes (ACTIVE / CANCELLED / FROZEN …) → flip imported products between Active and Draft.
+  topics = ["app_subscriptions/update"]
+  uri = "https://lumen-api.example.workers.dev/webhooks/shopify"
+
+  [[webhooks.subscriptions]]
+  # Mark the store uninstalled and drop its access token.
+  topics = ["app/uninstalled"]
+  uri = "https://lumen-api.example.workers.dev/webhooks/shopify"
+
+  [[webhooks.subscriptions]]
+  # Learn the merchant's own selling prices (margin alerts) and detect deleted products.
+  topics = ["products/update", "products/delete"]
+  uri = "https://lumen-api.example.workers.dev/webhooks/shopify"
+
+  [[webhooks.subscriptions]]
+  # Mandatory GDPR/compliance webhooks (required for App Store review).
+  compliance_topics = ["customers/data_request", "customers/redact", "shop/redact"]
+  uri = "https://lumen-api.example.workers.dev/webhooks/shopify"
+
+[build]
+# The worker URL is stable; don't let `shopify app dev` rewrite application_url to a tunnel.
+automatically_update_urls_on_dev = false
